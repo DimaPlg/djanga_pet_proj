@@ -303,16 +303,182 @@
 #     userform = UserForm()
 #     return render(request, "index.html", {"form": userform})
 
+# from django.shortcuts import render
+# from django.http import HttpResponse
+# from .forms import UserForm
+
+
+# def index(request):
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         age = request.POST.get("age")
+#         return HttpResponse(f"<h2>Привет, {name}, твой возраст: {age}</h2>")
+#     else:
+#         userform = UserForm()
+#         return render(request, "index.html", {"form": userform})
+
+# from .models import Person
+#
+# # получаем все объекты
+# people = Person.objects.all()
+# print(people.query)
+#
+# # получаем объекты с именем Tom
+# people = people.filter(name="Tom")
+# print(people.query)
+#
+# # получаем объекты с возрастом, равным 31
+# people = people.filter(age=31)
+# print(people.query)
+#
+# # здесь происходит выполнения запроса в БД
+# for person in people:
+#     print(f"{person.id}.{person.name} - {person.age}")
+
+# from django.shortcuts import render
+# from django.http import HttpResponseRedirect, HttpResponseNotFound
+# from .models import Person
+#
+#
+# # получение данных из бд
+# def index(request):
+#     people = Person.objects.all()
+#     return render(request, "index.html", {"people": people})
+#
+#
+# # сохранение данных в бд
+# def create(request):
+#     if request.method == "POST":
+#         person = Person()
+#         person.name = request.POST.get("name")
+#         person.age = request.POST.get("age")
+#         person.save()
+#     return HttpResponseRedirect("/")
+#
+#
+# # изменение данных в бд
+# def edit(request, id):
+#     try:
+#         person = Person.objects.get(id=id)
+#
+#         if request.method == "POST":
+#             person.name = request.POST.get("name")
+#             person.age = request.POST.get("age")
+#             person.save()
+#             return HttpResponseRedirect("/")
+#         else:
+#             return render(request, "edit.html", {"person": person})
+#     except Person.DoesNotExist:
+#         return HttpResponseNotFound("<h2>Person not found</h2>")
+#
+#
+# # удаление данных из бд
+# def delete(request, id):
+#     try:
+#         person = Person.objects.get(id=id)
+#         person.delete()
+#         return HttpResponseRedirect("/")
+#     except Person.DoesNotExist:
+#         return HttpResponseNotFound("<h2>Person not found</h2>")
+
+# from django.shortcuts import render
+# from .models import Company, Product
+# from django.http import HttpResponseRedirect, HttpResponseNotFound
+#
+#
+# # получение данных из бд
+# def index(request):
+#     products = Product.objects.all()
+#     return render(request, "index.html", {"products": products})
+#
+#
+# # добавление данных из бд
+# def create(request):
+#     create_companies()  # добавляем начальные данные для компаний
+#
+#     # если запрос POST, сохраняем данные
+#     if request.method == "POST":
+#         product = Product()
+#         product.name = request.POST.get("name")
+#         product.price = request.POST.get("price")
+#         product.company_id = request.POST.get("company")
+#         product.save()
+#         return HttpResponseRedirect("/")
+#     # передаем данные в шаблон
+#     companies = Company.objects.all()
+#     return render(request, "create.html", {"companies": companies})
+#
+#
+# # изменение данных в бд
+# def edit(request, id):
+#     try:
+#         product = Product.objects.get(id=id)
+#
+#         if request.method == "POST":
+#             product.name = request.POST.get("name")
+#             product.price = request.POST.get("price")
+#             product.company_id = request.POST.get("company")
+#             product.save()
+#             return HttpResponseRedirect("/")
+#         else:
+#             companies = Company.objects.all()
+#             return render(request, "edit.html", {"product": product, "companies": companies})
+#     except Product.DoesNotExist:
+#         return HttpResponseNotFound("<h2>Product not found</h2>")
+#
+#
+# # удаление данных из бд
+# def delete(request, id):
+#     try:
+#         product = Product.objects.get(id=id)
+#         product.delete()
+#         return HttpResponseRedirect("/")
+#     except Product.DoesNotExist:
+#         return HttpResponseNotFound("<h2>Product not found</h2>")
+#
+#
+# # добавление начальных данных в таблицу компаний
+# def create_companies():
+#     if Company.objects.all().count() == 0:
+#         Company.objects.create(name="Apple")
+#         Company.objects.create(name="Asus")
+#         Company.objects.create(name="MSI")
+
+from datetime import date
 from django.shortcuts import render
-from django.http import HttpResponse
-from .forms import UserForm
+from .models import Student, Course
+from django.http import HttpResponseRedirect
 
 
+# получение данных из бд
 def index(request):
+    # фильтрация
+    students = Student.objects.all()
+    return render(request, "index.html", {"students": students})
+
+
+# добавление данных в бд
+def create(request):
+    initialize()
+    # если запрос POST, сохраняем данные
     if request.method == "POST":
-        name = request.POST.get("name")
-        age = request.POST.get("age")
-        return HttpResponse(f"<h2>Привет, {name}, твой возраст: {age}</h2>")
-    else:
-        userform = UserForm()
-        return render(request, "index.html", {"form": userform})
+        student = Student()
+        student.name = request.POST.get("name")
+        course_ids = request.POST.getlist("courses")
+        student.save()
+        # получаем все выбранные курсы по их id
+        courses = Course.objects.filter(id__in=course_ids)
+        student.courses.set(courses, through_defaults={"date": date.today(), "mark": 0})
+        return HttpResponseRedirect("/")
+    # передаем данные в шаблон
+    courses = Course.objects.all()
+    return render(request, "create.html", {"courses": courses})
+
+
+def initialize():
+    # Student.objects.all().delete()
+    # Course.objects.all().delete()
+    if Course.objects.all().count() == 0:
+        Course.objects.create(name="Python")
+        Course.objects.create(name="Django")
+        Course.objects.create(name="FastAPI")
