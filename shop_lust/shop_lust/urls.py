@@ -142,6 +142,31 @@ from wep_shop import views
 #     path("postuser/", views.postuser),
 # ]
 
+# urlpatterns = [
+#     # path("", views.index),
+# ]
+
+# from django.urls import path
+# from wep_shop import views
+#
+# urlpatterns = [
+#     path("", views.index),
+#     path("create/", views.create),
+#     path("edit/<int:id>/", views.edit),
+#     path("delete/<int:id>/", views.delete),
+# ]
+
+from django.urls import path
+from wep_shop import views
+
+# urlpatterns = [
+#     path("", views.index),
+#     path("create/", views.create),
+#     path("edit/<int:id>/", views.edit),
+#     path("delete/<int:id>/", views.delete),
+# ]
+
 urlpatterns = [
     path("", views.index),
+    path("create/", views.create),
 ]
