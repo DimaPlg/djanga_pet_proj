@@ -43,3 +43,6 @@ class Enrollment(models.Model):
     date = models.DateField()  # дата поступления
     mark = models.IntegerField()  # полученный балл
     # /
+
+class K:
+    pass
